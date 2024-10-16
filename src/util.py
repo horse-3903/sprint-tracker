@@ -1,17 +1,15 @@
 import os
 from pathlib import Path
-
-from tqdm import tqdm
-
 import cv2
 from ultralytics import YOLO
+from tqdm import tqdm
 
 class ModelNotFoundError(Exception):
     pass
 
 class SprintTracker:
-    def __init__(self, model, input_file, output_file):
-        if model in [model.split(".")[0] for model in os.listdir("models")]:
+    def __init__(self, model: str, input_file: str, output_file: str):
+        if model.split("/")[1] not in [m for m in os.listdir("models")]:
             raise ModelNotFoundError(f"Model {model} not found, please include the parent directory 'model/[model-name]' if you have not")
 
         print("Loading Model...", end="")
@@ -31,10 +29,34 @@ class SprintTracker:
         self.input_file = input_file
         self.output_file = output_file
 
-    def track_sprint(self, conf: float = 0.5, max_det: int = 1, verbose: bool = False, save: bool = False):
+    def crop_video(self):
         cap = cv2.VideoCapture(self.input_file)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        ret, frame = cap.read()
+        
+        if not ret:
+            print("Error: Could not read video frame.")
+            return None
+        
+        # Set the window to the same size as the video frame
+        cv2.namedWindow("Select ROI", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Select ROI", frame.shape[1], frame.shape[0])
+        
+        # Allow the user to select the ROI
+        roi = cv2.selectROI("Select ROI", frame, fromCenter=False, showCrosshair=True)
+        cv2.destroyWindow("Select ROI")
+        cap.release()
+        
+        return roi
+
+    def track_sprint(self, conf: float = 0.5, max_det: int = 1, verbose: bool = False, save: bool = False):
+        roi = self.crop_video()
+        if roi is None:
+            return
+
+        x, y, w, h = roi
+        cap = cv2.VideoCapture(self.input_file)
+        width = w
+        height = h
 
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -53,7 +75,10 @@ class SprintTracker:
             if not ret:
                 break
 
-            results = self.model.predict(source=frame, conf=conf, max_det=max_det, verbose=verbose)
+            # Crop the frame based on ROI
+            cropped_frame = frame[y:y+h, x:x+w]
+
+            results = self.model.predict(source=cropped_frame, conf=conf, max_det=max_det, verbose=verbose)
 
             annotated_frame = results[0].plot()
 
@@ -77,5 +102,5 @@ class SprintTracker:
         print(f"Output video saved to {self.output_file}")
         
 if __name__ == "__main__":
-    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test-2.mp4", output_file="output/test-output-7.mp4")
+    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test-1.mp4", output_file="output/test-output-3.mp4")
     st.track_sprint(conf=0.35, max_det=12, verbose=False, save=True)
