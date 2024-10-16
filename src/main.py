@@ -4,7 +4,7 @@ import os
 
 # Load the YOLOv8 model trained for pose detection (e.g., face, hands, body landmarks)
 print("Loading Model...", end="")
-model = YOLO("./models/yolo11n-pose.pt")
+model = YOLO("./models/yolo11m-pose.pt")
 print("Done")
 
 # Define the output directory and ensure it exists
@@ -20,7 +20,7 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Set up VideoWriter to save the output video
-output_path = f'{output_dir}/test-output.mp4'  # Use the correct relative path
+output_path = f'{output_dir}/test-output-2.mp4'  # Use the correct relative path
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4 format
 fps = int(cap.get(cv2.CAP_PROP_FPS)) 
 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
@@ -39,7 +39,7 @@ while True:
         break
 
     # Run the YOLO model on the frame for pose detection (face, hands, body)
-    results = model.predict(source=frame, conf=0.05, max_det=15, verbose=True)
+    results = model.predict(source=frame, conf=0.25, max_det=10, verbose=True)
 
     # Annotate the frame with detected landmarks, bounding boxes, and labels
     annotated_frame = results[0].plot()
