@@ -102,5 +102,5 @@ class SprintTracker:
         print(f"Output video saved to {self.output_file}")
         
 if __name__ == "__main__":
-    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test-1.mp4", output_file="output/test-output-3.mp4")
-    st.track_sprint(conf=0.35, max_det=12, verbose=False, save=True)
+    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test-1.mp4", output_file="output/test-output-4.mp4")
+    st.track_sprint(conf=0.1, max_det=12, verbose=False, save=True)
