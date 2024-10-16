@@ -24,7 +24,9 @@ class SprintTracker:
         output_path = Path(output_file)
 
         if not os.path.exists(os.path.abspath(output_path.parent.absolute())):
-            raise FileNotFoundError(f"Output file {output_path.parent.absolute()} not found")
+            raise FileNotFoundError(f"Output directory {output_path.parent.absolute()} not found")
+        if os.path.exists(os.path.abspath(output_file)):
+            raise FileExistsError(f"Output file {os.path.abspath(output_file)} already exists")
 
         self.input_file = input_file
         self.output_file = output_file
@@ -75,5 +77,5 @@ class SprintTracker:
         print(f"Output video saved to {self.output_file}")
         
 if __name__ == "__main__":
-    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test.mp4", output_file="output/test-output-4.mp4")
-    st.track_sprint(conf=0.5, max_det=10, verbose=False, save=True)
+    st = SprintTracker(model="models/yolo11x-pose.pt", input_file="input/test-2.mp4", output_file="output/test-output-7.mp4")
+    st.track_sprint(conf=0.35, max_det=12, verbose=False, save=True)
