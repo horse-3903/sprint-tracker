@@ -14,8 +14,8 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Open the video file (you can also use 0 for the default webcam)
-file_name = "test.mp4"
-cap = cv2.VideoCapture(f"./data/{file_name}")
+file_name = "./input/test-1.mp4"
+cap = cv2.VideoCapture(file_name)
 
 # Get video dimensions (width and height)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -43,7 +43,7 @@ while True:
         break
 
     # Run the YOLO model on the frame for pose detection (face, hands, body)
-    results = model.predict(source=frame, conf=0.3, max_det=15, verbose=True)
+    results = model.predict(source=frame, conf=0.1, max_det=12, verbose=True)
 
     # Annotate the frame with detected landmarks, bounding boxes, and labels
     annotated_frame = results[0].plot()
